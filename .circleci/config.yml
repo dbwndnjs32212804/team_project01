@@ -1,47 +1,332 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
-version: 2.1
+from doctest import master
+from tkinter import *
+from numpy import insert
 
-# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
-# See: https://circleci.com/docs/2.0/orb-intro/
-orbs:
-  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.2
+try:
+    import Tkinter as tk
+except:
+    import tkinter as tk
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  build-and-test: # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a Docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from Dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI Docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.8 container
-    # Change the version below to your required version of python
-    docker:
-      - image: cimg/python:3.8
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
-    steps:
-      - checkout
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
-      - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: pytest
+class SampleApp(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self._frame = None
+        self.switch_frame(FnD)
 
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
-    jobs:
-      - build-and-test
+    def switch_frame(self, frame_class):
+        new_frame = frame_class(self)
+        if self._frame is not None:
+            self._frame.destroy()
+        self._frame = new_frame
+        self._frame.grid()
+
+class FnD(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        self.photo1 = PhotoImage(file="icons8-restaurant-on-site-96.png", master=self) # 그림
+        w = Label(self, image=self.photo1).grid(row=0, column=1) # 그림 자리 지정
+        label = Label(self, text="음식 혹은 음료수를 드시겠습니까?", font=30).grid(row=1,column=1) # 글씨
+
+        global d_price
+        global s_price
+        global r_price
+        global n_price
+
+        d_price = 0
+        s_price = 0
+        r_price = 0
+        n_price = 0
+
+        yes = Button(self, text="예", command=lambda: master.switch_frame(foodMenu), font=50).grid(row=1,column=3) # 버튼 (예) , foodMenu로 이동
+        no = Button(self, text="아니오", command=lambda: master.switch_frame(Pay), font=50).grid(row=1,column=4) # 버튼 (아니오)
+
+
+class foodMenu(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+
+        self.photo1 = PhotoImage(file="icons8-soda-100.png", master=self)
+        w = Label(self, image=self.photo1).grid(row=0, column=0)  # 그림
+        message1 = "음료 코너"
+        w2 = Button(self, justify=RIGHT, padx=10, text=message1, command=lambda: master.switch_frame(drink), font=30).grid(row=0,
+                                                                                                        column=1)  # 음료 버튼
+
+        self.photo2 = PhotoImage(file="icons8-cookie-100.png", master=self)
+        w = Label(self, image=self.photo2).grid(row=1, column=0)  # 그림
+        message2 = "과자 코너"
+        w2 = Button(self, justify=RIGHT, padx=10, text=message2, command=lambda: master.switch_frame(snack), font=30).grid(row=1,
+                                                                                                        column=1)  # 과자 버튼
+
+        self.photo3 = PhotoImage(file="icons8-rice-bowl-100.png", master=self)
+        w = Label(self, image=self.photo3).grid(row=2, column=0)  # 그림
+        message3 = "밥 코너"
+        w2 = Button(self, justify=RIGHT, padx=10, text=message3, command=lambda: master.switch_frame(rice), font=30).grid(row=2,
+                                                                                                       column=1)  # 밥 버튼
+
+        self.photo4 = PhotoImage(file="icons8-noodles-100.png", master=self)
+        w = Label(self, image=self.photo4).grid(row=3, column=0)  # 그림
+        message4 = "면 코너"
+        w2 = Button(self, justify=RIGHT, padx=10, text=message4, command=lambda: master.switch_frame(nudle), font=30).grid(row=3, column=1)
+
+        b = Button(self, text = "결제", font=20, command = lambda: master.switch_frame(Pay)).grid(row = 4, column = 2)
+        backBtn = Button(self, text = "이전", font=20, command = lambda: master.switch_frame(FnD)).grid(row = 4, column = 3)
+
+
+class drink(tk.Frame):
+    def __init__(self, master):
+        global de1, de2, de3, de4
+        Frame.__init__(self, master)
+        title=Label(self, text=" 음료 : ", font=30).grid(row=1, column=0) # 제목 (음료)
+        l=Label(self, text="개수").grid(row=3, column=0) # 개수
+
+        self.photo1 = PhotoImage(file="water.png", master=self)
+        w =Label(self, image=self.photo1).grid(row=0, column=1) # 그림
+        message1 = "생수"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message1, font=30).grid(row=1, column=1) # 생수
+        w3 = Label(self, text="3000원").grid(row=2, column=1) # 3000원
+        de1 = Entry(self)
+        de1.grid(row=3, column=1) # 개수 적는 칸
+
+        self.photo2 = PhotoImage(file="cola.png", master=self)
+        w =Label(self, image=self.photo2).grid(row=0, column=2) # 그림
+        message2 = "콜라"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message2, font=30).grid(row=1, column=2) # 생수
+        w3 = Label(self, text="2000원").grid(row=2, column=2) # 2000원
+        de2 = Entry(self)
+        de2.grid(row=3, column=2) # 개수 적는 칸
+
+        self.photo3 = PhotoImage(file="gatorade.png", master=self)
+        w =Label(self, image=self.photo3).grid(row=0, column=3)
+        message3 = "게토레이"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message3, font=30).grid(row=1, column=3)
+        w3 = Label(self, text="1500원").grid(row=2, column=3)
+        de3 = Entry(self)
+        de3.grid(row=3, column=3)
+
+        self.photo4 = PhotoImage(file="bori.png", master=self)
+        w =Label(self, image=self.photo4).grid(row=0, column=4)
+        message4 = "블랙보리"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message4, font=30).grid(row=1, column=4)
+        w3 = Label(self, text="2500원").grid(row=2, column=4)
+        de4 = Entry(self)
+        de4.grid(row=3, column=4)
+
+        de1.insert(0,"0")
+        de2.insert(0, "0")
+        de3.insert(0, "0")
+        de4.insert(0, "0")
+
+        b=Button(self, text="확인", font=20, command = lambda: self.price(int(de1.get()), int(de2.get()), int(de3.get()), int(de4.get())))
+        b.grid(row=3, column=5) # 버튼 (확인)
+        backBtn = Button(self, text = "이전", font=20, command = lambda: master.switch_frame(foodMenu)).grid(row = 2, column = 5, sticky = NW)
+
+    def price(self, de1, de2, de3, de4):
+        global d_price
+        d_price = 3000 * int(de1) + 2000 * int(de2) + 1500 * int(de3) + 2500 * int(de4)
+        print(str(d_price) + "원")
+
+
+class snack(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        title = Label(self, text=" 과자 : ", font=30).grid(row=1, column=0) # 제목 (과자)
+        l=Label(self, text="개수").grid(row=3, column=0) # 개수
+
+        global se1, se2, se3, se4
+        self.photo1 = PhotoImage(file="chocochip.png", master=self)
+        w =Label(self, image=self.photo1).grid(row=0, column=1) # 그림
+        message1 = "촉촉한 초코칩"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message1, font=30).grid(row=1, column=1) #초코
+        w3 = Label(self, text="4500원").grid(row=2, column=1) # 4500원
+        se1 = Entry(self)
+        se1.grid(row=3, column=1) # 개수 적는 칸
+
+        self.photo2 = PhotoImage(file="andes.png", master=self)
+        w =Label(self, image=self.photo2).grid(row=0, column=2)
+        message2 = "초콜릿"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message2, font=30).grid(row=1, column=2)
+        w3 = Label(self, text="1500원").grid(row=2, column=2)
+        se2 = Entry(self)
+        se2.grid(row=3, column=2)
+
+        self.photo3 = PhotoImage(file="aces.png", master=self)
+        w =Label(self, image=self.photo3).grid(row=0, column=3)
+        message3 = "에이스"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message3, font=30).grid(row=1, column=3)
+        w3 = Label(self, text="2500원").grid(row=2, column=3)
+        se3 = Entry(self)
+        se3.grid(row=3, column=3)
+
+        self.photo4 = PhotoImage(file="chew.png", master=self)
+        w =Label(self, image=self.photo4).grid(row=0, column=4)
+        message4 = "말랑카우"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message4, font=30).grid(row=1, column=4)
+        w3 = Label(self, text="3000원").grid(row=2, column=4)
+        se4 = Entry(self)
+        se4.grid(row=3, column=4)
+
+        se1.insert(0, "0")
+        se2.insert(0, "0")
+        se3.insert(0, "0")
+        se4.insert(0, "0")
+
+        b=Button(self, text="확인", font=20, command = lambda: self.price(int(se1.get()), int(se2.get()), int(se3.get()), int(se4.get()))).grid(row=3, column=5)
+        backBtn = Button(self, text="이전", font=20, command=lambda: master.switch_frame(foodMenu)).grid(row=2, column=5,
+                                                                                                       sticky=NW)
+
+    def price(self, se1, se2, se3, se4):
+        global s_price
+        s_price = 4500 * int(se1) + 1500 * int(se2) + 2500 * int(se3) + 3000 * int(se4)
+        print(str(s_price) + "원")
+
+    # def price(self, e1, e2, e3, e4):
+    #     price = 4500 * int(se1) + 1500 * int(se2) + 2500 * int(se3) + 3000 * int(se4)
+    #     with open('people.txt', 'a', encoding="utf8") as f:
+    #         for temp in len(price):
+    #             f.write(f'{name} : {price} \n')
+    #     print(price)
+
+
+class rice(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        title = Label(self, text=" 밥 : ", font=30).grid(row=1, column=0)
+        l=Label(self, text="개수").grid(row=3, column=0)
+
+        global re1, re2, re3, re4
+        self.photo1 = PhotoImage(file="octpig.png", master=self)
+        w =Label(self, image=self.photo1).grid(row=0, column=1)
+        message1 = "오삼불고기 덮밥"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message1, font=30).grid(row=1, column=1)
+        w3 = Label(self, text="5000원").grid(row=2, column=1)
+        re1 = Entry(self)
+        re1.grid(row=3, column=1)
+
+        self.photo2 = PhotoImage(file="chickma.png", master=self)
+        w =Label(self, image=self.photo2).grid(row=0, column=2)
+        message2 = "치킨마요 덮밥"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message2, font=30).grid(row=1, column=2)
+        w3 = Label(self, text="4500원").grid(row=2, column=2)
+        re2 = Entry(self)
+        re2.grid(row=3, column=2)
+
+        self.photo3 = PhotoImage(file="kimchi.png", master=self)
+        w =Label(self, image=self.photo3).grid(row=0, column=3)
+        message3 = "김치 볶음밥"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message3, font=30).grid(row=1, column=3)
+        w3 = Label(self, text="4000원").grid(row=2, column=3)
+        re3 = Entry(self)
+        re3.grid(row=3, column=3)
+
+        self.photo4 = PhotoImage(file="octrice.png", master=self)
+        w =Label(self, image=self.photo4).grid(row=0, column=4)
+        message4 = "낙지 볶음밥"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message4, font=30).grid(row=1, column=4)
+        w3 = Label(self, text="5500원").grid(row=2, column=4)
+        re4 = Entry(self)
+        re4.grid(row=3, column=4)
+
+        re1.insert(0, "0")
+        re2.insert(0, "0")
+        re3.insert(0, "0")
+        re4.insert(0, "0")
+
+        b = Button(self, text="확인", font=20,command=lambda: self.price(int(re1.get()), int(re2.get()), int(re3.get()), int(re4.get()))).grid(
+            row=3, column=5)  # 버튼 (확인)
+        backBtn = Button(self, text="이전", font=20, command=lambda: master.switch_frame(foodMenu)).grid(row=2, column=5,
+                                                                                                       sticky=NW)
+
+    def price(self, re1, re2, re3, re4):
+        global r_price
+        r_price = 5000 * int(re1) + 4500 * int(re2) + 4000 * int(re3) + 5500 * int(re4)
+        print(str(r_price) + "원")
+
+
+class nudle(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        title = Label(self, text=" 면 : ", font=30).grid(row=1, column=0)
+        l=Label(self, text="개수").grid(row=3, column=0)
+
+        global ne1, ne2, ne3, ne4
+        self.photo1 = PhotoImage(file="buldak.png", master=self)
+        w =Label(self, image=self.photo1).grid(row=0, column=1)
+        message1 = "불닭볶음면"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message1, font=30).grid(row=1, column=1)
+        w3 = Label(self, text="3000원").grid(row=2, column=1)
+        ne1 = Entry(self)
+        ne1.grid(row=3, column=1)
+
+        self.photo2 = PhotoImage(file="black.png", master=self)
+        w =Label(self, image=self.photo2).grid(row=0, column=2)
+        message2 = "짜파게티"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message2, font=30).grid(row=1, column=2)
+        w3 = Label(self, text="2500원").grid(row=2, column=2)
+        ne2 = Entry(self)
+        ne2.grid(row=3, column=2)
+
+        self.photo3 = PhotoImage(file="raman.png", master=self)
+        w =Label(self, image=self.photo3).grid(row=0, column=3)
+        message3 = "틈새라면"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message3, font=30).grid(row=1, column=3)
+        w3 = Label(self, text="2000원").grid(row=2, column=3)
+        ne3 = Entry(self)
+        ne3.grid(row=3, column=3)
+
+        self.photo4 = PhotoImage(file="white.png", master=self)
+        w =Label(self, image=self.photo4).grid(row=0, column=4)
+        message4 = "안성탕면"
+        w2 = Label(self, justify=RIGHT, padx=10, text=message4, font=30).grid(row=1, column=4)
+        w3 = Label(self, text="2500원").grid(row=2, column=4)
+        ne4 = Entry(self)
+        ne4.grid(row=3, column=4)
+
+        ne1.insert(0, "0")
+        ne2.insert(0, "0")
+        ne3.insert(0, "0")
+        ne4.insert(0, "0")
+
+        b=Button(self, text="확인", font=20,  command=lambda: self.price(int(ne1.get()), int(ne2.get()), int(ne3.get()), int(ne4.get()))).grid(row=3, column=5)
+        backBtn = Button(self, text="이전", font=20, command=lambda: master.switch_frame(foodMenu)).grid(row=2, column=5,
+                                                                                                       sticky=NW)
+
+    def price(self, ne1, ne2, ne3, ne4):
+        global n_price
+        n_price = 3000 * int(ne1) + 2500 * int(ne2) + 2000 * int(ne3) + 2500 * int(ne4)
+        print(str(n_price) + "원")
+
+class Pay(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        self.photo1 = PhotoImage(file="icons8-cash-in-hand-100.png", master=self)
+        p = Label(self, image=self.photo1).grid(row=0, column=0)  # 그림
+        sum = d_price + s_price + r_price + n_price
+        message1 = "총 금액 : " + str(sum)
+        w = Label(self, text=message1, font=50).grid(row=1, column=0)
+        message2 = "결제하시겠습니까?"
+        w = Label(self, text=message2, font= 50).grid(row=2, column=0)
+        w1 = Label(self, text="       ", font=50).grid(row=2, column=1)
+        w2 = Button(self, justify=RIGHT, padx=10, text="예", command=lambda: master.switch_frame(Closor),
+                    font=30).grid(row=1,column=5)
+        backBtn = Button(self, text="아니오", font=20, command=lambda: master.switch_frame(Closor)).grid(row=2, column=5,
+                                                                                                       sticky=NW)
+
+class Closor(tk.Frame):
+    def __init__(self, master):
+        Frame.__init__(self, master)
+        w = Label(self, text="감사합니다.", font=30).grid(row=0, column=0)
+        b = Button(self, justify=RIGHT, padx=10, text="창 닫기", command=lambda: master.switch_frame(Quit),
+                    font=10)
+        b.grid(row=2,column=0)
+
+
+class Quit(tk.Frame):
+    def __init__(self,master):
+        Frame.__init__(self, master)
+        w = Label(self, command=self.quit())
+
+if __name__ == "__main__":
+    app = SampleApp()
+    app.mainloop()
+
+
